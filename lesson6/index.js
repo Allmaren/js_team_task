@@ -7,14 +7,18 @@ const refs = {
 const BASE_URL = "https://app.ticketmaster.com/discovery/v2/";
 const API_KEY = "9cTjAjlRB53wyhAFk5VzXcBu5GiPU6fK";
 
+let pageToFetch = 0;
+let queryToPage = '';
+
+
 /*https://app.ticketmaster.com/discovery/v2/events.json?keyword=devjam&source=universe&countryCode=US&apikey={apikey} */
 
-function fetchEvents(page, keyWord) {
+function fetchEvents(page, keyword) {
   const params = new URLSearchParams({
     apikey: API_KEY,
     page,
-    keyWord,
-    size: 50,
+    keyword,
+    size: 10,
   });
   return fetch(`${BASE_URL}events.json?${params}`)
     .then((response) => {
@@ -33,9 +37,10 @@ function getEvents(page, keyWord) {
     console.log(result);
     const events = result._embedded.events;
     renderEvents(events);
+    refs.btnMore.classList.remove('btn_hidden');
   });
 }
-getEvents(1, "cat");
+
 
 function renderEvents(events) {
   const markup = events
@@ -49,3 +54,11 @@ function renderEvents(events) {
 
   refs.eventList.insertAdjacentHTML("beforeend", markup);
 }
+
+refs.form.addEventListener('submit', (event) => {
+ event.preventDefault();
+ queryToPage = event.target.elements.search.value;
+ 
+ getEvents(pageToFetch,queryToPage );
+
+}) 
