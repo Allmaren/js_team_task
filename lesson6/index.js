@@ -1,6 +1,6 @@
 const refs = {
   form: document.querySelector(".form"),
-  btnSearch: document.querySelector(".search"),
+  eventList: document.querySelector(".list"),
   btnMore: document.querySelector(".more"),
 };
 
@@ -26,4 +26,26 @@ function fetchEvents(page, keyWord) {
     .catch((error) => {
       console.log(error);
     });
+}
+
+function getEvents(page, keyWord) {
+  fetchEvents(page, keyWord).then((result) => {
+    console.log(result);
+    const events = result._embedded.events;
+    renderEvents(events);
+  });
+}
+getEvents(1, "cat");
+
+function renderEvents(events) {
+  const markup = events
+    .map(({ name, images }) => {
+      return `  <li>
+  <img src="${images[0].url}" width="370" height="270"/>
+  <h2>${name}</h2></li>
+  `;
+    })
+    .join("");
+
+  refs.eventList.insertAdjacentHTML("beforeend", markup);
 }
