@@ -1,7 +1,7 @@
 const refs = {
   form: document.querySelector(".form"),
   eventList: document.querySelector(".list"),
-  btnMore: document.querySelector(".more")
+  btnMore: document.querySelector(".more"),
 };
 
 const BASE_URL = "https://app.ticketmaster.com/discovery/v2/";
@@ -17,26 +17,38 @@ function fetchEvents(page, keyword) {
     apikey: API_KEY,
     page,
     keyword,
-    size: 10
+    size: 100,
   });
   return fetch(`${BASE_URL}events.json?${params}`)
-    .then(response => {
+    .then((response) => {
       if (response.status !== 200) {
         throw new Error(response.status);
       }
       return response.json();
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
     });
 }
 
 function getEvents(page, keyWord) {
-  fetchEvents(page, keyWord).then(result => {
-    console.log(result);
+  fetchEvents(page, keyWord).then((result) => {
+    // console.log(result);
+    if (result.page.totalElements === 0) {
+      refs.btnMore.classList.add("btn_hidden");
+      alert("No results by your requirement!!!");
+      return;
+    }
+    if (pageToFetch === result.page.totalPages) {
+      refs.btnMore.classList.add("btn_hidden");
+      alert("No more results by your requirement!!!");
+      return;
+    }
     const events = result._embedded.events;
     renderEvents(events);
-    refs.btnMore.classList.remove("btn_hidden");
+    if (result.page.totalPages > 1) {
+      refs.btnMore.classList.remove("btn_hidden");
+    }
   });
 }
 
@@ -53,13 +65,17 @@ function renderEvents(events) {
   refs.eventList.insertAdjacentHTML("beforeend", markup);
 }
 
-refs.form.addEventListener("submit", event => {
+refs.form.addEventListener("submit", (event) => {
   event.preventDefault();
   queryToPage = event.target.elements.search.value;
+
+  pageToFetch = 0;
+  refs.eventList.innerHTML = "";
 
   getEvents(pageToFetch, queryToPage);
 });
 
 refs.btnMore.addEventListener("click", () => {
+  pageToFetch += 1;
   getEvents(pageToFetch, queryToPage);
 });
